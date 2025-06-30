@@ -1,6 +1,8 @@
 
 
-import { prisma } from '../../lib/prisma';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Prisma } from '@prisma/client';
 import { Check, Clock, AlertTriangle } from 'lucide-react';
 
@@ -35,28 +37,54 @@ type VaccinationRecordWithType = {
   };
 };
 
-// This function fetches data from your database
-async function getPets(): Promise<PetWithRecords[]> {
-  try {
-    const pets = await prisma.pet.findMany({
-      take: 1,
-      include: {
-        records: {
-          include: {
-            type: true
-          }
-        }
-      }
-    });
-    return pets;
-  } catch (error) {
-    console.error('Error fetching pets:', error);
-    return [];
-  }
-}
+export default function Home() {
+  const [pets, setPets] = useState<PetWithRecords[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function Home() {
-  const pets = await getPets();
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets');
+      const data = await response.json();
+      setPets(data);
+    } catch (error) {
+      console.error('Error fetching pets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markVaccinationComplete = async (recordId: number) => {
+    try {
+      const response = await fetch(`/api/vaccinations/${recordId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          completedAt: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the pets data
+        fetchPets();
+      }
+    } catch (error) {
+      console.error('Error updating vaccination:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
@@ -128,7 +156,10 @@ export default async function Home() {
                                 }
                               </td>
                               <td className="py-3 px-3">
-                                <button className="px-3 py-1 bg-highlight text-white text-xs rounded-4xl transition-colors hover:bg-opacity-80">
+                                <button 
+                                  onClick={() => markVaccinationComplete(record.id)}
+                                  className="px-3 py-1 bg-highlight text-white text-xs rounded-4xl transition-colors hover:bg-opacity-80"
+                                >
                                   {record.completedAt 
                                     ? isOverdue 
                                       ? 'Mark Complete'
