@@ -10,14 +10,17 @@ async function main() {
   await prisma.pet.deleteMany();
 
   // Add some vaccination types
-  const distemper = await prisma.vaccinationType.create({
-    data: { name: 'Distemper', interval: 12 },
-  });
   const rabies = await prisma.vaccinationType.create({
     data: { name: 'Rabies', interval: 12 },
   });
-  const fvrcp = await prisma.vaccinationType.create({
-    data: { name: 'FVRCP', interval: 12 },
+  const leptospirosis = await prisma.vaccinationType.create({
+    data: { name: 'Leptospirosis', interval: 12 },
+  });
+  const parvovirus = await prisma.vaccinationType.create({
+    data: { name: 'Parvovirus', interval: 12 },
+  });
+  const kennelCough = await prisma.vaccinationType.create({
+    data: { name: 'Kennel Cough', interval: 12 },
   });
 
   // Add multiple pets with species and breed
@@ -26,65 +29,31 @@ async function main() {
       name: 'Max',
       species: 'Dog',
       breed: 'Golden Retriever',
-      birthDate: new Date('2022-05-10'),
+      birthDate: new Date('2022-05-10'), // 10/05/2022
       records: {
         create: [
           {
-            typeId: distemper.id,
-            completedAt: new Date('2024-07-15'), // 15/07/2024
+            typeId: rabies.id,
+            completedAt: new Date('2025-03-15'), // 15/03/2025 - current
           },
           {
-            typeId: rabies.id,
-            completedAt: new Date('2024-01-20'), // 20/01/2024
+            typeId: leptospirosis.id,
+            completedAt: new Date('2024-10-10'), // 10/10/2024 - current
+          },
+          {
+            typeId: parvovirus.id,
+            completedAt: new Date('2024-06-30'), // 30/06/2024 - due today (30/06/2025)
+          },
+          {
+            typeId: kennelCough.id,
+            completedAt: null, // Never completed - overdue (due 15/06/2025)
           },
         ],
       },
     },
   });
 
-  const luna = await prisma.pet.create({
-    data: {
-      name: 'Luna',
-      species: 'Cat',
-      breed: 'Siamese',
-      birthDate: new Date('2021-03-20'),
-      records: {
-        create: [
-          {
-            typeId: fvrcp.id,
-            completedAt: new Date('2024-03-25'), // 25/03/2024
-          },
-          {
-            typeId: rabies.id,
-            completedAt: null, // Pending vaccination
-          },
-        ],
-      },
-    },
-  });
-
-  const buddy = await prisma.pet.create({
-    data: {
-      name: 'Buddy',
-      species: 'Dog',
-      breed: 'Mixed Breed',
-      birthDate: new Date('2020-08-15'),
-      records: {
-        create: [
-          {
-            typeId: distemper.id,
-            completedAt: new Date('2023-08-15'), // 15/08/2023 (overdue)
-          },
-          {
-            typeId: rabies.id,
-            completedAt: new Date('2023-08-15'), // 15/08/2023 (overdue)
-          },
-        ],
-      },
-    },
-  });
-
-  console.log('✅ Seed complete. Created pets:', max.name, luna.name, buddy.name);
+  console.log('✅ Seed complete. Created pets:', max.name,);
 }
 
 main()

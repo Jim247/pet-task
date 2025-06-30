@@ -128,8 +128,13 @@ export default async function Home() {
                                 }
                               </td>
                               <td className="py-3 px-3">
-                                <button className="px-3 py-1 bg-highlight text-white text-xs rounded-4xl transition-colors">
-                                  {record.completedAt ? 'Update' : 'Complete'}
+                                <button className="px-3 py-1 bg-highlight text-white text-xs rounded-4xl transition-colors hover:bg-opacity-80">
+                                  {record.completedAt 
+                                    ? isOverdue 
+                                      ? 'Mark Complete'
+                                      : 'Update' 
+                                    : 'Mark Complete'
+                                  }
                                 </button>
                               </td>
                             </tr>
