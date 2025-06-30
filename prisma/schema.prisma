@@ -8,24 +8,26 @@ datasource db {
 }
 
 model Pet {
-  id        Int      @id @default(autoincrement())
+  id        Int                 @id @default(autoincrement())
   name      String
+  species   String              // e.g., "Dog", "Cat", "Bird"
+  breed     String?             // e.g., "Golden Retriever", "Siamese" (optional)
   birthDate DateTime
   records   VaccinationRecord[]
 }
 
 model VaccinationType {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  interval  Int      // months between doses (e.g. 12 = yearly)
-  records   VaccinationRecord[]
+  id       Int                 @id @default(autoincrement())
+  name     String              @unique
+  interval Int
+  records  VaccinationRecord[]
 }
 
 model VaccinationRecord {
-  id          Int              @id @default(autoincrement())
-  pet         Pet              @relation(fields: [petId], references: [id])
+  id          Int             @id @default(autoincrement())
   petId       Int
-  type        VaccinationType  @relation(fields: [typeId], references: [id])
   typeId      Int
   completedAt DateTime?
+  type        VaccinationType @relation(fields: [typeId], references: [id])
+  pet         Pet             @relation(fields: [petId], references: [id])
 }
