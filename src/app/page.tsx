@@ -40,6 +40,9 @@ type VaccinationRecordWithType = {
 export default function Home() {
   const [pets, setPets] = useState<PetWithRecords[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<number | null>(null);
+  const [completionDate, setCompletionDate] = useState('');
 
   useEffect(() => {
     fetchPets();
@@ -58,24 +61,40 @@ export default function Home() {
   };
 
   const markVaccinationComplete = async (recordId: number) => {
+    setSelectedRecord(recordId);
+    setCompletionDate(new Date().toISOString().split('T')[0]);
+    setShowDateModal(true);
+  };
+
+  const handleDateSubmit = async () => {
+    if (!selectedRecord || !completionDate) return;
+
     try {
-      const response = await fetch(`/api/vaccinations/${recordId}`, {
+      const response = await fetch(`/api/vaccinations/${selectedRecord}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          completedAt: new Date().toISOString(),
+          completedAt: new Date(completionDate).toISOString(),
         }),
       });
 
       if (response.ok) {
-        // Refresh the pets data
+        setShowDateModal(false);
+        setSelectedRecord(null);
+        setCompletionDate('');
         fetchPets();
       }
     } catch (error) {
       console.error('Error updating vaccination:', error);
     }
+  };
+
+  const closeDateModal = () => {
+    setShowDateModal(false);
+    setSelectedRecord(null);
+    setCompletionDate('');
   };
 
   if (loading) {
@@ -118,9 +137,9 @@ export default function Home() {
                       </thead>
                       <tbody>
                         {pet.records.map((record: VaccinationRecordWithType) => {
-                          const lastCompleted = record.completedAt;
+                          const lastCompleted = record.completedAt ? new Date(record.completedAt) : null;
                           const dueDate = lastCompleted 
-                            ? new Date(lastCompleted.getTime() + (record.type.interval * 365 * 24 * 60 * 60 * 1000))
+                            ? new Date(lastCompleted.getFullYear() + 1, lastCompleted.getMonth(), lastCompleted.getDate())
                             : null;
                           const isOverdue = dueDate && dueDate < new Date();
                           
@@ -151,7 +170,7 @@ export default function Home() {
                               </td>
                               <td className="py-3 px-3 text-gray-600">
                                 {dueDate 
-                                  ? formatDateUK(new Date(dueDate))
+                                  ? formatDateUK(dueDate)
                                   : '-'
                                 }
                               </td>
@@ -178,6 +197,42 @@ export default function Home() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Date Selection Modal */}
+      {showDateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 mx-4">
+            <h3 className="text-lg font-semibold mb-4 text-black">Select Completion Date</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date Completed (DD/MM/YYYY)
+              </label>
+              <input
+                type="date"
+                value={completionDate}
+                onChange={(e) => setCompletionDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={closeDateModal}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDateSubmit}
+                className="px-4 py-2 bg-highlight text-white rounded-md hover:bg-opacity-80"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
