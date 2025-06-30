@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  birthDate DateTime
+  records   VaccinationRecord[]
+}
+
+model VaccinationType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  interval  Int      // months between doses (e.g. 12 = yearly)
+  records   VaccinationRecord[]
+}
+
+model VaccinationRecord {
+  id          Int              @id @default(autoincrement())
+  pet         Pet              @relation(fields: [petId], references: [id])
+  petId       Int
+  type        VaccinationType  @relation(fields: [typeId], references: [id])
+  typeId      Int
+  completedAt DateTime?
+}
