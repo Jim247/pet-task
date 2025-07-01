@@ -19,3 +19,17 @@ a {
   text-decoration: none;
 }
 
+.bt-green {
+  background-color: #D8F0F3;
+  color: #256b74;
+}
+
+.bt-red {
+  background-color: #F8D3D3;
+  color: #CD3736;
+}
+
+.bt-yellow {
+  background-color: #FBF4EA;
+  color: #D69430;
+}
