@@ -92,12 +92,13 @@ npm run seed         # Populate database with sample data
 ```
 
 ### Quick Start (Fresh Clone)
-1. Clone the repo
-2. Copy `.env.example` to `.env` (or just use the default SQLite setup)
-3. Run: `npm run setup`
-4. Start development: `npm run dev`
-5. Open http://localhost:3000 to see the app
-6. (Optional) View database: `npm run db:studio`
+1. **Clone the repo**
+2. **Run: `npm run setup`** (automatically creates `.env` from `.env.example`)
+3. **Start development: `npm run dev`**
+4. **Open http://localhost:3000** to see the app
+5. (Optional) View database: `npm run db:studio`
+
+> **Note**: No manual `.env` setup required! The setup script automatically creates the environment file with sensible defaults.
 
 ## 📊 Database Schema
 - **Pet** - Store pet information (name, species, breed, birth date)
