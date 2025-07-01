@@ -68,7 +68,7 @@ A full-stack Next.js application for tracking pet vaccinations, built for a tech
 ```bash
 npm run setup
 ```
-This will install dependencies, generate Prisma client, and set up the database.
+This will install dependencies, generate Prisma client, set up the database, and populate with sample data.
 
 ### Daily Development Commands
 
@@ -91,12 +91,13 @@ npm run db:generate  # Generate Prisma client after schema changes
 npm run seed         # Populate database with sample data
 ```
 
-### Quick Start (Fresh Setup)
+### Quick Start (Fresh Clone)
 1. Clone the repo
-2. Run: `npm run setup`
-3. Seed the database: `npm run seed`
+2. Copy `.env.example` to `.env` (or just use the default SQLite setup)
+3. Run: `npm run setup`
 4. Start development: `npm run dev`
-5. View database: `npm run db:studio`
+5. Open http://localhost:3000 to see the app
+6. (Optional) View database: `npm run db:studio`
 
 ## 📊 Database Schema
 - **Pet** - Store pet information (name, species, breed, birth date)

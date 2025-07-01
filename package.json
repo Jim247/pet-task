@@ -11,7 +11,7 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "setup": "npm install && prisma generate && prisma db push"
+    "setup": "npm install && prisma generate && prisma db push && npm run seed"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",
