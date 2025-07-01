@@ -93,12 +93,12 @@ npm run seed         # Populate database with sample data
 
 ### Quick Start (Fresh Clone)
 1. **Clone the repo**
-2. **Run: `npm run setup`** (automatically creates `.env` from `.env.example`)
+2. **Run: `npm run setup`**
 3. **Start development: `npm run dev`**
 4. **Open http://localhost:3000** to see the app
 5. (Optional) View database: `npm run db:studio`
 
-> **Note**: No manual `.env` setup required! The setup script automatically creates the environment file with sensible defaults.
+> **Note**: The `.env` file is included in the repository for demo purposes, making setup completely seamless.
 
 ## 📊 Database Schema
 - **Pet** - Store pet information (name, species, breed, birth date)
