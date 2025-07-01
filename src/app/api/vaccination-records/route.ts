@@ -1,7 +1,29 @@
+/**
+ * Vaccination Records API Route
+ * 
+ * POST /api/vaccination-records
+ * Creates new vaccination records when users add vaccinations via the modal.
+ * Validates input data and creates properly linked database records.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+/**
+ * POST handler - Creates a new vaccination record
+ * 
+ * Expected request body:
+ * {
+ *   petId: number,
+ *   typeId: number, 
+ *   completedAt: string (ISO date)
+ * }
+ * 
+ * @param request - Next.js request object containing the vaccination data
+ * @returns Created vaccination record with related type information
+ */
 
 export async function POST(request: NextRequest) {
   try {

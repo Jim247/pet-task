@@ -1,11 +1,27 @@
 
 
+/**
+ * Pet Vaccination Tracker - Main Application Component
+ * 
+ * This is the primary component for the pet vaccination tracking application.
+ * Features include:
+ * - Display pet vaccination records in a sortable table
+ * - Inline editing for marking vaccinations as complete
+ * - Modal for adding new vaccination records
+ * - British date formatting throughout
+ * - Real-time status calculation (completed, due soon, overdue)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Check, Clock, AlertTriangle, ChevronUp, ChevronDown, Plus } from 'lucide-react';
 
-// Utility function for British date format
+/**
+ * Utility function to format dates in British format (DD/MM/YYYY)
+ * @param date - The date object to format
+ * @returns Formatted date string in DD/MM/YYYY format
+ */
 const formatDateUK = (date: Date): string => {
   return date.toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -14,7 +30,11 @@ const formatDateUK = (date: Date): string => {
   });
 };
 
-// Define the type using Prisma's generated types
+/**
+ * TypeScript interfaces for type safety
+ */
+
+// Pet data structure with nested vaccination records
 type PetWithRecords = {
   id: number;
   name: string;
@@ -31,7 +51,7 @@ type PetWithRecords = {
   }[];
 };
 
-// Define vaccination record type
+// Individual vaccination record structure
 type VaccinationRecordWithType = {
   id: number;
   completedAt: Date | null;
@@ -42,24 +62,43 @@ type VaccinationRecordWithType = {
   };
 };
 
+/**
+ * Main Application Component
+ * Manages all state and renders the pet vaccination tracking interface
+ */
+
 export default function Home() {
+  // Core application state
   const [pets, setPets] = useState<PetWithRecords[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Inline editing state for marking vaccinations complete
   const [editingRecord, setEditingRecord] = useState<number | null>(null);
   const [completionDate, setCompletionDate] = useState('');
+  
+  // Table sorting state
   const [sortBy, setSortBy] = useState<'urgency' | 'status' | 'dueDate'>('urgency');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  // Add vaccination modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
   const [newVaccinationType, setNewVaccinationType] = useState('');
   const [newCompletionDate, setNewCompletionDate] = useState('');
   const [vaccinationTypes, setVaccinationTypes] = useState<{id: number, name: string}[]>([]);
 
+  /**
+   * Load initial data when component mounts
+   */
+
   useEffect(() => {
     fetchPets();
     fetchVaccinationTypes();
   }, []);
 
+  /**
+   * Fetches all pets and their vaccination records from the API
+   */
   const fetchPets = async () => {
     try {
       const response = await fetch('/api/pets');
@@ -72,6 +111,9 @@ export default function Home() {
     }
   };
 
+  /**
+   * Fetches available vaccination types for the add modal dropdown
+   */
   const fetchVaccinationTypes = async () => {
     try {
       const response = await fetch('/api/vaccination-types');
@@ -82,11 +124,25 @@ export default function Home() {
     }
   };
 
+  /**
+   * Inline Editing Functions
+   * Handles the inline date picker for marking vaccinations as complete
+   */
+
+  /**
+   * Initiates inline editing for a vaccination record
+   * @param recordId - ID of the vaccination record to edit
+   */
+
   const markVaccinationComplete = async (recordId: number) => {
     setEditingRecord(recordId);
-    setCompletionDate(new Date().toISOString().split('T')[0]);
+    setCompletionDate(new Date().toISOString().split('T')[0]); // Default to today
   };
 
+  /**
+   * Submits the completion date for a vaccination record
+   * @param recordId - ID of the vaccination record to update
+   */
   const handleDateSubmit = async (recordId: number) => {
     if (!completionDate) return;
 
@@ -104,39 +160,70 @@ export default function Home() {
       if (response.ok) {
         setEditingRecord(null);
         setCompletionDate('');
-        fetchPets();
+        fetchPets(); // Refresh data to show updated status
       }
     } catch (error) {
       console.error('Error updating vaccination:', error);
     }
   };
 
+  /**
+   * Cancels inline editing and resets the editing state
+   */
   const cancelEdit = () => {
     setEditingRecord(null);
     setCompletionDate('');
   };
 
+  /**
+   * Table Sorting Functions
+   * Handles clickable column headers for sorting by status and due date
+   */
+
+  /**
+   * Handles column header clicks for sorting
+   * @param column - The column to sort by ('status' or 'dueDate')
+   */
+
   const handleSort = (column: 'status' | 'dueDate') => {
     if (sortBy === column) {
+      // Toggle direction if same column clicked
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
+      // Set new column and default to ascending
       setSortBy(column);
       setSortDirection('asc');
     }
   };
 
+  /**
+   * Add Vaccination Modal Functions
+   * Handles the modal for adding new vaccination records
+   */
+
+  /**
+   * Opens the add vaccination modal for a specific pet
+   * @param petId - ID of the pet to add vaccination for
+   */
   const openAddModal = (petId: number) => {
     setSelectedPetId(petId);
     setShowAddModal(true);
-    setNewCompletionDate(new Date().toISOString().split('T')[0]);
+    setNewCompletionDate(new Date().toISOString().split('T')[0]); // Default to today
   };
 
+  /**
+   * Closes the add modal and resets all form state
+   */
   const closeAddModal = () => {
     setShowAddModal(false);
     setSelectedPetId(null);
     setNewVaccinationType('');
     setNewCompletionDate('');
   };
+
+  /**
+   * Creates a new vaccination record via API
+   */
 
   const handleAddVaccination = async () => {
     if (!selectedPetId || !newVaccinationType || !newCompletionDate) return;
@@ -156,7 +243,7 @@ export default function Home() {
 
       if (response.ok) {
         closeAddModal();
-        fetchPets();
+        fetchPets(); // Refresh data to show new record
       } else {
         console.error('Failed to add vaccination record');
       }
@@ -164,6 +251,8 @@ export default function Home() {
       console.error('Error adding vaccination:', error);
     }
   };
+
+  // Show loading state while data is being fetched
 
   if (loading) {
     return (
@@ -182,6 +271,7 @@ export default function Home() {
         <div className="w-full max-w-4/5">
           {pets.map((pet) => (
             <div key={pet.id} className="mb-6">
+              {/* Pet Header with Name and Add Button */}
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-2xl text-black">
                   {pet.name}&apos;s Vaccinations
@@ -194,6 +284,8 @@ export default function Home() {
                   ADD VACCINATION
                 </button>
               </div>
+              
+              {/* Pet Details */}
               <div className="text-gray-600 mb-4">
                 {pet.breed && (
                   <p>
@@ -201,6 +293,8 @@ export default function Home() {
                   </p>
                 )}
               </div>
+              
+              {/* Vaccination Records Table */}
               <div className="bg-white rounded-3xl border border-gray-200 p-6">
               {pet.records.length === 0 ? (
                 <p className="text-gray-400 italic">No vaccinations recorded</p>
@@ -211,6 +305,7 @@ export default function Home() {
                       <thead>
                         <tr className="border-gray-200">
                           <th className="text-left py-4 px-6 font-semibold text-highlight">Vaccination</th>
+                          {/* Sortable Status Column */}
                           <th 
                             className="text-center py-4 px-6 font-semibold text-highlight cursor-pointer hover:bg-gray-50 transition-colors"
                             onClick={() => handleSort('status')}
@@ -232,6 +327,7 @@ export default function Home() {
                             </div>
                           </th>
                           <th className="text-left py-4 px-6 font-semibold text-highlight">Last Completed</th>
+                          {/* Sortable Due Date Column */}
                           <th 
                             className="text-left py-4 px-6 font-semibold text-highlight cursor-pointer hover:bg-gray-50 transition-colors"
                             onClick={() => handleSort('dueDate')}
@@ -259,6 +355,7 @@ export default function Home() {
                         {pet.records
                           .sort((a, b) => {
                             if (sortBy === 'urgency') {
+                              // Default urgency-based sorting (completed -> due soon -> overdue)
                               const aCompleted = a.completedAt ? new Date(a.completedAt) : null;
                               const aDueDate = aCompleted 
                                 ? new Date(aCompleted.getFullYear() + 1, aCompleted.getMonth(), aCompleted.getDate())
@@ -277,6 +374,7 @@ export default function Home() {
                               
                               return aUrgency - bUrgency;
                             } else if (sortBy === 'status') {
+                              // Sort by status text alphabetically
                               const aCompleted = a.completedAt ? new Date(a.completedAt) : null;
                               const aDueDate = aCompleted 
                                 ? new Date(aCompleted.getFullYear() + 1, aCompleted.getMonth(), aCompleted.getDate())
@@ -295,6 +393,7 @@ export default function Home() {
                               const result = aStatus.localeCompare(bStatus);
                               return sortDirection === 'asc' ? result : -result;
                             } else if (sortBy === 'dueDate') {
+                              // Sort by actual due date chronologically
                               const aCompleted = a.completedAt ? new Date(a.completedAt) : null;
                               const aDueDate = aCompleted 
                                 ? new Date(aCompleted.getFullYear() + 1, aCompleted.getMonth(), aCompleted.getDate())
@@ -311,6 +410,7 @@ export default function Home() {
                             return 0;
                           })
                           .map((record: VaccinationRecordWithType) => {
+                          // Calculate vaccination status for this record
                           const lastCompleted = record.completedAt ? new Date(record.completedAt) : null;
                           const dueDate = lastCompleted 
                             ? new Date(lastCompleted.getFullYear() + 1, lastCompleted.getMonth(), lastCompleted.getDate())
@@ -319,7 +419,10 @@ export default function Home() {
                           
                           return (
                             <tr key={record.id} className="border border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                              {/* Vaccination Name */}
                               <td className="py-5 px-6 font-medium text-gray-800">{record.type.name}</td>
+                              
+                              {/* Status Badge with Icon */}
                               <td className="py-5 px-6 text-center">
                                 <span className={`px-2 py-2 rounded-full text-xs font-medium flex items-center justify-center gap-1 ${
                                   record.completedAt 
@@ -336,21 +439,28 @@ export default function Home() {
                                   }
                                 </span>
                               </td>
+                              
+                              {/* Last Completed Date */}
                               <td className="py-5 px-6 text-gray-600">
                                 {record.completedAt 
                                   ? formatDateUK(new Date(record.completedAt))
                                   : '-'
                                 }
                               </td>
+                              
+                              {/* Due Date */}
                               <td className="py-5 px-6 text-gray-600">
                                 {dueDate 
                                   ? formatDateUK(dueDate)
                                   : '-'
                                 }
                               </td>
+                              
+                              {/* Action Column - Inline Editing or Mark Complete Button */}
                               <td className="py-5 px-6 text-center">
                                 {!(record.completedAt && !isOverdue) && (
                                   editingRecord === record.id ? (
+                                    // Inline date picker with submit/cancel buttons
                                     <div className="flex items-center gap-2 justify-center">
                                       <input
                                         type="date"
@@ -374,6 +484,7 @@ export default function Home() {
                                       </button>
                                     </div>
                                   ) : (
+                                    // Mark complete button
                                     <button 
                                       onClick={() => markVaccinationComplete(record.id)}
                                       className="px-3 py-2 bg-highlight text-white text-xs rounded-full transition-colors hover:bg-opacity-80"
@@ -404,6 +515,7 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Add Vaccination</h3>
             
             <div className="space-y-4">
+              {/* Vaccination Type Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Vaccination Type
@@ -422,6 +534,7 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Completion Date Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Completion Date
@@ -435,6 +548,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Modal Action Buttons */}
             <div className="flex gap-3 mt-6">
               <button
                 onClick={closeAddModal}
